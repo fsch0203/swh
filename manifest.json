@@ -1,0 +1,17 @@
+{
+    "background": {
+        "service_worker": "js/background.js",
+        "type": "module"
+    },
+    "name": "Smart Web History",
+    "version": "0.1",
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    },
+    "description": "Uses the chrome.history API to display in a popup the user's most visited pages.",
+    "permissions": ["downloads", "history"],
+    "action": {
+        "default_icon": "res/swh06.png"
+    },
+    "manifest_version": 3
+}

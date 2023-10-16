@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="theme-color" content="#218C8D">
+    <!-- <link rel='shortcut icon' type='image/x-icon' href='res/img/favicon.ico' /> -->
+    <meta charset="UTF-8">
+    <title>Smart Web History</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link href="css/swh.css" rel="stylesheet" type="text/css" />
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/dayjs.min.js"></script>
+    <script src="js/swh.js"></script>
+</head>
+
+
+<body>
+    <!-- The Modal -->
+    <div id="popup-settings" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="close-modal" class="closingx">&times;</span>
+                <h2 class="modal-header-text">Settings</h2>
+            </div>
+            <div class="modal-body">
+                <ul>
+                    <li class="setting-item" title="Download domains">
+                        <button id="download" class="button_gen" type="button">▼
+                        </button>Download urls
+                    </li>
+                    <li class="setting-item" title="Import urls">
+                        <button id="open_file" class="button_gen" type="button">▲
+                        </button>Import urls from file
+                    </li>
+                    <li class="setting-item" title="App will be closed after a link has been clicked">
+                        <input id="auto_close_window" type="checkbox">
+                        <label for="auto_close_window" class="checkboxes">Auto close window
+                        </label>
+                    </li>
+                    <li class="setting-item" title="Format date, e.g. MM/dd/YYYY, or YYYY-MM-dd</span>Format dates">
+                        Format dates
+                        <input type="text" id="date_format_input" name="date_format_input"></input>
+                    </li>
+                    <li class="setting-item" title="Favorite&nbsp;domains that will be displayed in the toolbar">
+                        Favorite domains
+                        <textarea id="fav_domains_ta" name="fav-domains"></textarea>
+                    </li>
+                    <li class="setting-item" title="Domains that will not be displayed">
+                        Skip domains
+                        <textarea id="skip_domains_ta" name="skip-domains"></textarea>
+                    </li>
+                    <li class="setting-item" title="Restore default settings">
+                        <button id="restore_settings_btn" class="button_gen" type="button">R
+                        </button>Restore default settings
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+    <div class="angry-grid">
+        <div id="item-t">
+            <span id="app_img" class="header"><img height="28" width="28" src="res/swh06.png"/></span>&nbsp;
+            <span id="apptitle" class="apptitle"></span>
+        </div>
+        <div id="item-0">
+            <span class="header">Recent domains</span><span id="count_domains"></span>
+        </div>
+        <div id="item-1">
+            <span id="time_domain_buttons" class="button_row">
+                <button id="go_settings_btn" class="button button2 font_large" type="button" title="Settings">≡</button>
+                <button id="clear" class="button button2" type="button" title="Show all">C</button>
+                <label for="search_on_date"></label>
+                <span class="tooltip">
+                    <input type="date" id="search_on_date" name="search_on_date" data-date-format="DD-MMM-YYYY" title="Search on date">
+                </span>
+            </span>
+            <span id="fav_domain_buttons" class="button_row"></span>
+            <span id="sel_domain_buttons" class="button_row"></span>
+        </div>
+        <div id="item-2">
+            <input title="quickFindInput" placeholder="Find domain" type="search" id="quickFindInput" />
+        </div>
+        <div id="item-3">
+            <table id="domain_rows">
+            </table>
+        </div>
+        <div id="item-4" class="container_head">
+            <span id="sel_domain_img" class="header"></span>&nbsp;
+            <span id="sel_domain" class="header"></span>
+        </div>
+        <div id="item-5" class="container_head">
+            <label class="checkboxes">Skip duplicates
+                <input id="skip_duplicate_urls" type="checkbox" checked="checked">
+            </label>
+            <span id="count_urls"></span>
+        </div>
+        <div id="item-6">&nbsp;</div>
+        <div id="item-7">
+            <table id="url_rows">
+            </table>
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>
