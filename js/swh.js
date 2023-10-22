@@ -3,13 +3,11 @@ _default_settings = { //settings that are stored in localstorage
     screeny: 100,
     screenw: 935,
     screenh: 700,
-    language: "nl",
-    auto_close_window: 'no', //yes
+    auto_close_window: true,
     fav_domains: ['youtube.com', 'spotify.com', 'wikipedia.org'],
     sel_domains: [], //domains that have been visited through this app
     skip_domains: ['chrome-extension','mail.google.com'], //skip these domains in domains table
-    max_sel_domains: 4,
-    skip_duplicate_urls: true,
+    max_sel_domains: 6,
     date_format: 'YYYY-MM-DD'
 };
 
@@ -23,12 +21,12 @@ _gv = { //global variables
     last_domain_idx: 0,
     app_title: 'Smart Web History',
     table_with_focus: 'domain_rows',
-    sel_domain: ''
+    sel_domain: '',
+    total_domains: 0,
+    website: 'https://github.com/fsch0203/swh'
 }
 
-
 function init(){
-    // _settings = _default_settings;
     window.moveTo(_settings.screenx, _settings.screeny);
     self.resizeTo(_settings.screenw, _settings.screenh);
     $('title').html(_gv.app_title);
@@ -36,7 +34,6 @@ function init(){
     date = dayjs().format('YYYY-MM-DD');
     $('#search_on_date').val(date);
     $('#search_on_date').attr('max',date); //prevent
-    $('#skip_duplicate_urls').prop('checked', _settings.skip_duplicate_urls);
     $('#quickFindInput').val('');
     if (_settings.fav_domains){
         var fd = _settings.fav_domains.join('\n');
@@ -45,10 +42,13 @@ function init(){
     if (_settings.skip_domains){
         var fd = _settings.skip_domains.join('\n');
     }
+    var manifestData = chrome.runtime.getManifest();
+    $('#version').html(manifestData.version);
+    $('#this-year').html(dayjs().format('YYYY'));
+    $('#website').html(`<a href="${_gv.website}" target="_blank">${_gv.website}</a>`);
     $('#skip_domains_ta').val(fd);
     $('#date_format_input').val(_settings.date_format);
     $('#auto_close_window').prop('checked', _settings.auto_close_window);
-    $('#search_on_date').attr("data-date-format", _settings.date_format);
 }
 
 function saveWindowPosition() { //activated after window resize
@@ -57,7 +57,7 @@ function saveWindowPosition() { //activated after window resize
     _settings.screeny = window.screenY;
     _settings.screenw = window.outerWidth;
     _settings.screenh = window.outerHeight;
-    let tableh = (_settings.screenh - 180) / 2;
+    let tableh = (_settings.screenh - 190) / 2;
     $('table').css('height', tableh);
     $('#domain_rows td.col_domain').css('width', (_settings.screenw - 230) * 1 / 3);
     $('#domain_rows td.col_domain').css('min-width', (_settings.screenw - 230) * 1 / 3);
@@ -78,7 +78,7 @@ function showDomainTable(domains) {
         <th>Date</th>
         <th>F</th>
         <th>Domain</th>
-        <th>Url</th>
+        <th>Last url</th>
     </tr>
   </thead>
 `
@@ -107,7 +107,12 @@ function showDomainTable(domains) {
         }
     }
     $('#domain_rows').html(rows);
-    $('#count_domains').html(` (${domains.length})`);
+    $('#count_domains').html(` (${domains.length}/${_gv.total_domains})`);
+    if (domains.length < _gv.total_domains){
+        $('#count_domains').addClass('highlight2')
+    } else {
+        $('#count_domains').removeClass('highlight2')
+    }
     $('#domain_rows tr').eq(1).click();
 }
 
@@ -115,21 +120,11 @@ function showUrlTable(selDomain) {
     const allUrls = JSON.parse(localStorage.getItem("allUrls"));
     selUrls = allUrls.filter(url => url.domain === selDomain);
     let n1 = selUrls.length;
-    if (_settings.skip_duplicate_urls) {
-        selUrls = selUrls.filter((value, index, self) =>
-            index === self.findIndex((t) => (
-                t.url === value.url || t.title === value.title
-            ))
-        )
-    }
-    let n3 = selUrls.length;
-    // rows = '';
     rows = `
 <thead>
     <tr>
         <th>Date</th>
-        <th>Url</th>
-        <th>Cnt</th>
+        <th>Visited urls at <span class="highlight2">${selDomain}</span></th>
     </tr>
   </thead>
 `
@@ -139,7 +134,6 @@ function showUrlTable(selDomain) {
 <tr>
     <td class="col_date">${date}</td>
     <td class="col_title"><a href="${selUrls[i].url}" target="_blank">${selUrls[i].title}</a></td>
-    <td class="col_count">${selUrls[i].vcnt}</td>
 </tr>        
 `
         rows += row;
@@ -149,12 +143,13 @@ function showUrlTable(selDomain) {
     let selDomainImg = `<img height="24" width="24" src="https://www.google.com/s2/favicons?domain=${selDomain}&sz=128" />`
     $('#sel_domain_img').html(selDomainImg);
     $('#sel_domain').html(selDomain);
-    $('#count_urls').html(`(${n3}/${n1})`);
+    $('#count_urls').html(`(${n1}/${allUrls.length})`);
 }
 
 function buildAllUrlList() {
     let allUrlsStored = JSON.parse(localStorage.getItem("allUrls")) || [];
     let allDomainsStored = JSON.parse(localStorage.getItem("allDomains")) || [];
+    _gv.total_domains = allDomainsStored.length;
     let lastDateStored = 0;
     let diff = 0; //time since last url was stored in local storage
     if (allUrlsStored.length > 0) {
@@ -172,7 +167,7 @@ function buildAllUrlList() {
             startTime: start_time
         },
         function (historyItems) { //get all new history items
-            console.log(`# new historyItems: ${historyItems.length}, since: ${date2LocalString(start_time)}`)
+            // console.log(`# new historyItems: ${historyItems.length}, since: ${date2LocalString(start_time)}`)
             let allUrlsNew = [];
             let allDomainsNew = [];
             for (let i = 0; i < historyItems.length; ++i) {
@@ -193,6 +188,7 @@ function buildAllUrlList() {
             allUrlsNew = allUrlsNew.concat(allUrlsStored);
             allDomainsNew = allDomainsNew.concat(allDomainsStored);
             allDomainsNew = deduplicateDomains(allDomainsNew);
+            allUrlsNew = deduplicateUrls(allUrlsNew);
             localStorage.setItem('allUrls', JSON.stringify(allUrlsNew));
             localStorage.setItem('allDomains', JSON.stringify(allDomainsNew));
             _gv.sel_domain = allDomainsNew[0].domain;
@@ -207,7 +203,6 @@ function buildToolBar(){
     if (_settings.fav_domains) {
         buttons = '';
         _settings.fav_domains.forEach(domain => {
-            // console.log(`domain ${domain}`)
             let button = `
 <button name="${domain}" class="button button2 button_domain" type="button" title="${domain}">
     &nbsp;<img height="16" width="16" src="http://www.google.com/s2/favicons?domain=http://${domain}" />&nbsp;
@@ -243,9 +238,25 @@ function deduplicateDomains(arr) {
     return arr;
 }
 
+function deduplicateUrls(arr) {
+    arr = arr.filter((value, index, self) =>
+        index === self.findIndex((t) => (
+            t.url === value.url || t.title === value.title
+        ))
+    );
+    return arr;
+}
+
+// function searchDomains1(query) {
+//     let allDomains = JSON.parse(localStorage.getItem("allDomains"));
+//     selDomains = allDomains.filter(url => url.domain.indexOf(query) >= 0);
+//     showDomainTable(selDomains);
+// }
+
 function searchDomains(query) {
-    let allDomains = JSON.parse(localStorage.getItem("allDomains"));
-    selDomains = allDomains.filter(url => url.domain.indexOf(query) >= 0);
+    let allUrls = JSON.parse(localStorage.getItem("allUrls"));
+    let selUrls = allUrls.filter(url => url.title.indexOf(query) >= 0 || url.domain.indexOf(query) >= 0);
+    let selDomains = deduplicateDomains(selUrls);
     showDomainTable(selDomains);
 }
 
@@ -295,11 +306,7 @@ function importUrls(Urls_from_file) {
             db = new Date(b.date);
         return db - da;
     });
-    allUrls = allUrls.filter((value, index, self) =>
-        index === self.findIndex((t) => (
-            t.url === value.url || t.title === value.title
-        ))
-    );
+    allUrls = deduplicateUrls(allUrls);
     localStorage.setItem('allDomains', JSON.stringify(allDomains));
     localStorage.setItem('allUrls', JSON.stringify(allUrls));
     $("#popup-settings").hide();
@@ -312,14 +319,12 @@ function date2LocalString(date) {
 }
 
 function rememberSelUrl(url){ //remember the last selected urls as icons in toolbar
-    console.log(`url ${url}`);
+    // console.log(`url ${url}`);
     const domain = url.replace(/^(?:https?:\/\/)?((?:[^@\/\n]+@)?[^:\/\n]+).*/g, '$1');
-    // console.log(`domain ${domain}`)
     const index = _settings.sel_domains.indexOf(domain); //check if domain is selected earlier
     if (index > -1) {
         _settings.sel_domains.splice(index, 1); // then remove (2nd parameter means remove one item only)
     }
-    // if (!_settings.fav_domains.includes(domain)){
     let check_fav = _settings.fav_domains.some(fav_domain => domain.includes(fav_domain)); //true if favorite is substring of domain
     if (!check_fav && !(domain == 'blob')) {
         _settings.sel_domains.unshift(domain);
@@ -332,15 +337,6 @@ function rememberSelUrl(url){ //remember the last selected urls as icons in tool
     return domain;
 }
 
-function dateDiffInDays(a, b) {
-    const _MS_PER_DAY = 1000 * 60 * 60 * 24;
-    // Discard the time and time-zone information.
-    const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-    const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-  
-    return Math.floor((utc2 - utc1) / _MS_PER_DAY);
-}
-  
 
 
 $(document).ready(function () {
@@ -355,19 +351,10 @@ $(document).ready(function () {
     $(document).on("click", "a", function () {
         const url = $(this).attr("href");
         domain = rememberSelUrl(url);
-        if (_settings.auto_close_window == true && !(domain == 'blob')) {
-            window.close();
-        } else {
+        if (_settings.auto_close_window == false || domain == 'blob' || url == _gv.website) {
             location.reload();
-        }
-    });
-    $(document).on('keydown', function (e) {
-        if (e.ctrlKey && e.which == 70)  { //Ctrl F
-            $("#popup-settings").hide();
-            // console.log(`find`)
-            e.preventDefault();
-            $('#quickFindInput').focus();
-            $('#quickFindInput').val('');
+        } else {
+            window.close();
         }
     });
     $('#url_rows').on('click', 'tr', function () {
@@ -376,30 +363,16 @@ $(document).ready(function () {
         $("#url_rows tr").removeClass("highlight");
         $(this).addClass("highlight");
         let url = $(this).find('a').attr('href');
-        // console.log(`clicked: ${url}`);
         saveWindowPosition()
     });
     $('#domain_rows').on('click', 'tr', function () {
-        // console.log(`clickkkk`)
         _gv.table_with_focus = 'domain_rows'
         $("#url_rows tr").removeClass("highlight");
         $("#domain_rows tr").removeClass("highlight");
         $(this).addClass("highlight");
         _gv.sel_domain = $(this).find('td.col_domain').html();
         showUrlTable(_gv.sel_domain);
-        // console.log(`clicked: ${_gv.sel_domain}`);
         saveWindowPosition()
-    });
-    $('#skip_duplicate_urls').change(function() {
-        if(this.checked) {
-            _settings.skip_duplicate_urls = true;
-            showUrlTable(_gv.sel_domain);
-        } else {
-            _settings.skip_duplicate_urls = false;
-            showUrlTable(_gv.sel_domain);
-        }
-        saveWindowPosition()
-        localStorage.setItem('settings', JSON.stringify(_settings));
     });
     $('#auto_close_window').change(function() {
         if(this.checked) {
@@ -409,6 +382,123 @@ $(document).ready(function () {
         }
         saveWindowPosition()
         localStorage.setItem('settings', JSON.stringify(_settings));
+    });
+    $("#quickFindInput").on('input', function () {
+        searchDomains($(this).val());
+    });
+    $("#date_format_input").on('input', function () {
+        _settings.date_format = $(this).val();
+        localStorage.setItem('settings', JSON.stringify(_settings));
+        // $('#search_on_date').trigger('change');
+    });
+    $("#clear").on("click", function () {
+        location.reload();
+        $('.angry-grid').trigger('keypress', {which: 40}); //trigger down/ip
+        $('.angry-grid').trigger('keypress', {which: 38});
+    });
+    $(".button_domain").on("click", function () {
+        domain_name = $(this).attr('name');
+        console.log(`${domain_name}`);
+        searchDomains(domain_name);
+    });
+    $("#download").on("click", function () {
+        let allUrls = localStorage.getItem("allUrls");
+        date = dayjs().format('YYYY-MM-DDTHH_mm');
+        downloadFileFromText(`${date} urls.json`, allUrls);
+    });
+    $("#open_file").on("click", function () {
+        const pickerOpts = {
+            types: [{
+                description: "Urls-file",
+                accept: {
+                    "json/*": ".json",
+                },
+            }, ],
+            excludeAcceptAllOption: true,
+            multiple: false,
+        };
+        let fileHandle;
+        async function openFilePick() {
+            // open file picker, destructure the one element returned array
+            [fileHandle] = await window.showOpenFilePicker(pickerOpts);
+            // run code with our fileHandle
+            const file = await fileHandle.getFile();
+            const contents = await file.text();
+            let contents_json = JSON.parse(contents);
+            importUrls(contents_json);
+        }
+        openFilePick();
+    });
+    $("#restore_settings_btn").on("click", function () {
+        _settings = _default_settings;
+        localStorage.setItem('settings', JSON.stringify(_settings));
+        $("#popup-settings").hide();
+        location.reload();
+    });
+    $("#today-2").on("click", function () {
+        searchDomainsBefore(2);
+    });
+    $("#go_settings_btn").on("click", function () {
+        $("#popup-settings").show();
+    });
+    $("#close-modal").on("click", function () {
+        $("#popup-settings").hide();
+        let str = $('#fav_domains_ta').val();
+        if (str.length > 0){
+            _settings.fav_domains = str.split('\n');
+            // console.log(`${_settings.fav_domains}`);
+        } else {
+            _settings.fav_domains = [];
+        }
+        str = $('#skip_domains_ta').val();
+        if (str.length > 0){
+            _settings.skip_domains = str.split('\n');
+            // console.log(`${_settings.skip_domains}`);
+        } else {
+            _settings.skip_domains = [];
+        }
+        buildAllUrlList();
+        buildToolBar();
+        localStorage.setItem('settings', JSON.stringify(_settings));
+    });
+    $(window).on("click", function (e) {
+        var modal =  document.getElementById("popup-settings");
+        if (e.target == modal){
+            $("#popup-settings").hide();
+        }
+    });
+    $("#search_on_date").on('change', function () { 
+        var input = this.value;
+        today = dayjs().format('YYYY-MM-DD');
+        date2 = new Date(today);
+        date1 = new Date(input);
+        const diffTime = Math.abs(date2 - date1);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        searchDomainsBefore(diffDays);
+        // console.log(`search on date: ${diffDays}`)
+    }).trigger("change");
+    $(document).on('keydown', function (e) {
+        if (e.ctrlKey && e.which == 70)  { //Ctrl F
+            $("#popup-settings").hide();
+            e.preventDefault();
+            $('#quickFindInput').focus();
+            $('#quickFindInput').val('');
+        }
+        if (e.which == 27) { //escape
+            e.preventDefault();
+            if ($('#quickFindInput').is(":focus")) {
+                if ($('#quickFindInput').val()) {
+                    $('#quickFindInput').val('');
+                    searchDomains('');
+                } else {
+                    window.close();
+                }
+            } else {
+                $('#quickFindInput').focus();
+                $('#quickFindInput').val('');
+                searchDomains('');
+            }
+        }
     });
     $('.angry-grid').on('keydown', function (e) {
         if (e.which == 40) { // highlight go down
@@ -484,21 +574,6 @@ $(document).ready(function () {
                 $('#domain_rows tr').eq(_gv.last_domain_idx+1).addClass('highlight'); // back to last row
             }
         }
-        if (e.which == 27) { //escape
-            e.preventDefault();
-            if ($('#quickFindInput').is(":focus")) {
-                if ($('#quickFindInput').val()) {
-                    $('#quickFindInput').val('');
-                    searchDomains('');
-                } else {
-                    window.close();
-                }
-            } else {
-                $('#quickFindInput').focus();
-                $('#quickFindInput').val('');
-                searchDomains('');
-            }
-        }
         if (e.which == 36) { //home
             e.preventDefault();
             if (_gv.table_with_focus == 'domain_rows') {
@@ -538,109 +613,6 @@ $(document).ready(function () {
         }
         saveWindowPosition()
     })
-    $("#quickFindInput").on('input', function () {
-        // console.log(`quickfind: ${$(this).val()}`)
-        searchDomains($(this).val());
-    });
-    $("#date_format_input").on('input', function () {
-        // console.log(`date_format: ${$(this).val()}`)
-        _settings.date_format = $(this).val();
-        localStorage.setItem('settings', JSON.stringify(_settings));
-        $('#search_on_date').attr("data-date-format", _settings.date_format);
-        $('#search_on_date').trigger('change');
-    });
-    $("#clear").on("click", function () {
-        location.reload();
-        $('.angry-grid').trigger('keypress', {which: 40}); //trigger down/ip
-        $('.angry-grid').trigger('keypress', {which: 38});
-    });
-    $(".button_domain").on("click", function () {
-        domain_name = $(this).attr('name');
-        console.log(`${domain_name}`);
-        searchDomains(domain_name);
-    });
-    $("#download").on("click", function () {
-        // let allDomains = localStorage.getItem("allDomains");
-        let allUrls = localStorage.getItem("allUrls");
-        // downloadFileFromText('domains.json', allDomains);
-        date = dayjs().format('YYYY-MM-DDTHH_mm');
-        downloadFileFromText(`${date} urls.json`, allUrls);
-    });
-    $("#open_file").on("click", function () {
-        const pickerOpts = {
-            types: [{
-                description: "Urls-file",
-                accept: {
-                    "json/*": ".json",
-                },
-            }, ],
-            excludeAcceptAllOption: true,
-            multiple: false,
-        };
-        let fileHandle;
-        async function openFilePick() {
-            // open file picker, destructure the one element returned array
-            [fileHandle] = await window.showOpenFilePicker(pickerOpts);
-            // run code with our fileHandle
-            const file = await fileHandle.getFile();
-            const contents = await file.text();
-            let contents_json = JSON.parse(contents);
-            importUrls(contents_json);
-        }
-        openFilePick();
-    });
-    $("#restore_settings_btn").on("click", function () {
-        _settings = _default_settings;
-        localStorage.setItem('settings', JSON.stringify(_settings));
-        $("#popup-settings").hide();
-        location.reload();
-    });
-    $("#today-2").on("click", function () {
-        searchDomainsBefore(2);
-    });
-    $("#go_settings_btn").on("click", function () {
-        $("#popup-settings").show();
-    });
-    $("#close-modal").on("click", function () {
-        $("#popup-settings").hide();
-        let str = $('#fav_domains_ta').val();
-        if (str.length > 0){
-            _settings.fav_domains = str.split('\n');
-            // console.log(`${_settings.fav_domains}`);
-        } else {
-            _settings.fav_domains = [];
-        }
-        str = $('#skip_domains_ta').val();
-        if (str.length > 0){
-            _settings.skip_domains = str.split('\n');
-            // console.log(`${_settings.skip_domains}`);
-        } else {
-            _settings.skip_domains = [];
-        }
-        buildAllUrlList();
-        buildToolBar();
-        localStorage.setItem('settings', JSON.stringify(_settings));
-    });
-    $(window).on("click", function (e) {
-        var modal =  document.getElementById("popup-settings");
-        if (e.target == modal){
-            $("#popup-settings").hide();
-        }
-    });
-    $("#search_on_date").on('change', function () { //https://stackoverflow.com/questions/7372038/is-there-any-way-to-change-input-type-date-format
-        this.setAttribute(
-            "data-date",
-            dayjs(this.value, "YYYY-MM-DD").format(this.getAttribute("data-date-format"))
-        )
-        var input = this.value;
-        today = dayjs().format('YYYY-MM-DD');
-        date2 = new Date(today);
-        date1 = new Date(input);
-        const diffTime = Math.abs(date2 - date1);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        searchDomainsBefore(diffDays);
-        console.log(`search on date: ${diffDays}`)
-    }).trigger("change");
 });
 
 

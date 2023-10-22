@@ -22,24 +22,22 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span id="close-modal" class="closingx">&times;</span>
-                <h2 class="modal-header-text">Settings</h2>
+                <!-- <h3 class="modal-header-text">Settings</h3> -->
             </div>
             <div class="modal-body">
+                <h3>Settings</h3>
                 <ul>
                     <li class="setting-item" title="Download domains">
-                        <button id="download" class="button_gen" type="button">▼
-                        </button>Download urls
-                    </li>
-                    <li class="setting-item" title="Import urls">
-                        <button id="open_file" class="button_gen" type="button">▲
-                        </button>Import urls from file
+                        <button id="download" class="button_gen" type="button">▼</button>Download urls
+                        <span class="float-right"><button id="open_file" class="button_gen" type="button">▲
+                        </button>Import urls from file</span>
                     </li>
                     <li class="setting-item" title="App will be closed after a link has been clicked">
                         <input id="auto_close_window" type="checkbox">
                         <label for="auto_close_window" class="checkboxes">Auto close window
                         </label>
                     </li>
-                    <li class="setting-item" title="Format date, e.g. MM/dd/YYYY, or YYYY-MM-dd</span>Format dates">
+                    <li class="setting-item" title="Format dates, e.g. MM/dd/YYYY, YYYY-MM-dd, etc.">
                         Format dates
                         <input type="text" id="date_format_input" name="date_format_input"></input>
                     </li>
@@ -56,6 +54,16 @@
                         </button>Restore default settings
                     </li>
                 </ul>
+                <hr/>
+                <div id="about-text" class="about-text">
+                    <h3>About Smart Web History</h3>
+                    <p>Smart Web History is an open source extension for Chrome and Edge to get better and faster access to 
+                        the browser history. It's developed by Frans Schrijver. 
+                    </p>
+                    <p>Version: <span id="version"></span></p>
+                    <p>More information: <span id="website"></span></p>
+                    <p>Copyright © <span id="this-year"></span> Frans Schrijver (MIT license)</p>
+                </div>
 
             </div>
         </div>
@@ -65,20 +73,17 @@
             <span id="app_img" class="header"><img height="28" width="28" src="res/swh06.png"/></span>&nbsp;
             <span id="apptitle" class="apptitle"></span>
         </div>
-        <div id="item-0">
-            <span class="header">Recent domains</span><span id="count_domains"></span>
-        </div>
         <div id="item-1">
             <span id="time_domain_buttons" class="button_row">
                 <button id="go_settings_btn" class="button button2 font_large" type="button" title="Settings">≡</button>
                 <button id="clear" class="button button2" type="button" title="Show all">C</button>
-                <label for="search_on_date"></label>
-                <span class="tooltip">
-                    <input type="date" id="search_on_date" name="search_on_date" data-date-format="DD-MMM-YYYY" title="Search on date">
-                </span>
-            </span>
-            <span id="fav_domain_buttons" class="button_row"></span>
+                <input type="date" id="search_on_date" class="button2" name="search_on_date" data-date-format="DD-MMM-YYYY" title="Search on date">
+            </span>&nbsp;
+            <span id="fav_domain_buttons" class="button_row"></span>&nbsp;
             <span id="sel_domain_buttons" class="button_row"></span>
+        </div>
+        <div id="item-0">
+            <span class="header">Recent domains</span><span id="count_domains"></span>
         </div>
         <div id="item-2">
             <input title="quickFindInput" placeholder="Find domain" type="search" id="quickFindInput" />
@@ -89,12 +94,7 @@
         </div>
         <div id="item-4" class="container_head">
             <span id="sel_domain_img" class="header"></span>&nbsp;
-            <span id="sel_domain" class="header"></span>
-        </div>
-        <div id="item-5" class="container_head">
-            <label class="checkboxes">Skip duplicates
-                <input id="skip_duplicate_urls" type="checkbox" checked="checked">
-            </label>
+            <span id="sel_domain" class="header"></span>&nbsp;
             <span id="count_urls"></span>
         </div>
         <div id="item-6">&nbsp;</div>
