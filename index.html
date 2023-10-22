@@ -27,31 +27,35 @@
             <div class="modal-body">
                 <h3>Settings</h3>
                 <ul>
-                    <li class="setting-item" title="Download domains">
-                        <button id="download" class="button_gen" type="button">▼</button>Download urls
-                        <span class="float-right"><button id="open_file" class="button_gen" type="button">▲
-                        </button>Import urls from file</span>
+                    <li class="setting-item">
+                        <button id="download" class="button_gen" type="button" 
+                            title="Download domains">▼</button>Download urls<span class="space10"></span>
+                        <button id="open_file" class="button_gen" type="button" 
+                            title="Upload domains">▲</button>Import urls from file
                     </li>
-                    <li class="setting-item" title="App will be closed after a link has been clicked">
-                        <input id="auto_close_window" type="checkbox">
-                        <label for="auto_close_window" class="checkboxes">Auto close window
-                        </label>
+                    <li class="setting-item">
+                        <input id="auto_close_window" type="checkbox" title="App will be closed after a link has been clicked">
+                        <label for="auto_close_window" class="checkboxes">Auto close window</label>
                     </li>
-                    <li class="setting-item" title="Format dates, e.g. MM/dd/YYYY, YYYY-MM-dd, etc.">
+                    <li class="setting-item">
                         Format dates
-                        <input type="text" id="date_format_input" name="date_format_input"></input>
+                        <input type="text" id="date_format_input" name="date_format_input" 
+                            title="Format dates, e.g. MM/dd/YYYY, YYYY-MM-dd, etc."></input>
                     </li>
-                    <li class="setting-item" title="Favorite&nbsp;domains that will be displayed in the toolbar">
+                    <li class="setting-item">
                         Favorite domains
-                        <textarea id="fav_domains_ta" name="fav-domains"></textarea>
+                        <textarea id="fav_domains_ta" name="fav-domains" 
+                            title="Favorite&nbsp;domains that will be displayed in the toolbar"></textarea>
                     </li>
-                    <li class="setting-item" title="Domains that will not be displayed">
+                    <li class="setting-item">
                         Skip domains
-                        <textarea id="skip_domains_ta" name="skip-domains"></textarea>
+                        <textarea id="skip_domains_ta" name="skip-domains"
+                            title="Domains that will not be displayed"></textarea>
                     </li>
-                    <li class="setting-item" title="Restore default settings">
-                        <button id="restore_settings_btn" class="button_gen" type="button">R
-                        </button>Restore default settings
+                    <li class="setting-item">
+                        <button id="restore_settings_btn" class="button_gen" 
+                            type="button" title="Restore default settings">R</button>
+                            Restore default settings
                     </li>
                 </ul>
                 <hr/>

@@ -52,7 +52,6 @@ function init(){
 }
 
 function saveWindowPosition() { //activated after window resize
-    // console.log(`saveWindowPosition`)
     _settings.screenx = window.screenX;
     _settings.screeny = window.screenY;
     _settings.screenw = window.outerWidth;
@@ -139,7 +138,6 @@ function showUrlTable(selDomain) {
         rows += row;
     }
     $('#url_rows').html(rows);
-    // selDomain = `<img height="16" width="16" src="http://www.google.com/s2/favicons?domain=http://${selDomain}" /> ${selDomain}`
     let selDomainImg = `<img height="24" width="24" src="https://www.google.com/s2/favicons?domain=${selDomain}&sz=128" />`
     $('#sel_domain_img').html(selDomainImg);
     $('#sel_domain').html(selDomain);
@@ -148,8 +146,7 @@ function showUrlTable(selDomain) {
 
 function buildAllUrlList() {
     let allUrlsStored = JSON.parse(localStorage.getItem("allUrls")) || [];
-    let allDomainsStored = JSON.parse(localStorage.getItem("allDomains")) || [];
-    _gv.total_domains = allDomainsStored.length;
+    allUrlsStored.forEach(elm=>delete elm.vcnt); //TODO: remove line
     let lastDateStored = 0;
     let diff = 0; //time since last url was stored in local storage
     if (allUrlsStored.length > 0) {
@@ -169,29 +166,24 @@ function buildAllUrlList() {
         function (historyItems) { //get all new history items
             // console.log(`# new historyItems: ${historyItems.length}, since: ${date2LocalString(start_time)}`)
             let allUrlsNew = [];
-            let allDomainsNew = [];
             for (let i = 0; i < historyItems.length; ++i) {
                 let url = historyItems[i].url;
                 let domain = url.replace(/^(?:https?:\/\/)?((?:[^@\/\n]+@)?[^:\/\n]+).*/g, '$1');
-                let vcnt = historyItems[i].visitCount;
                 let title = historyItems[i].title;
                 let date = new Date(historyItems[i].lastVisitTime);
                 allUrlsNew.push({
                     'domain': domain,
                     'url': url,
                     'title': title,
-                    'date': date,
-                    'vcnt': vcnt
+                    'date': date
                 });
             }
-            allDomainsNew = allUrlsNew;
             allUrlsNew = allUrlsNew.concat(allUrlsStored);
-            allDomainsNew = allDomainsNew.concat(allDomainsStored);
-            allDomainsNew = deduplicateDomains(allDomainsNew);
             allUrlsNew = deduplicateUrls(allUrlsNew);
+            allDomainsNew = deduplicateDomains(allUrlsNew);
             localStorage.setItem('allUrls', JSON.stringify(allUrlsNew));
-            localStorage.setItem('allDomains', JSON.stringify(allDomainsNew));
             _gv.sel_domain = allDomainsNew[0].domain;
+            _gv.total_domains = allDomainsNew.length;
             showDomainTable(allDomainsNew);
             showUrlTable(_gv.sel_domain);
         }
@@ -215,7 +207,6 @@ function buildToolBar(){
     if (_settings.sel_domains) {
         buttons = '';
         _settings.sel_domains.forEach(domain => {
-            // console.log(`domain ${domain}`)
             let button = `
 <button name="${domain}" class="button button2 button_domain" type="button" title="${domain}">
     &nbsp;<img height="16" width="16" src="http://www.google.com/s2/favicons?domain=http://${domain}" />&nbsp;
@@ -247,12 +238,6 @@ function deduplicateUrls(arr) {
     return arr;
 }
 
-// function searchDomains1(query) {
-//     let allDomains = JSON.parse(localStorage.getItem("allDomains"));
-//     selDomains = allDomains.filter(url => url.domain.indexOf(query) >= 0);
-//     showDomainTable(selDomains);
-// }
-
 function searchDomains(query) {
     let allUrls = JSON.parse(localStorage.getItem("allUrls"));
     let selUrls = allUrls.filter(url => url.title.indexOf(query) >= 0 || url.domain.indexOf(query) >= 0);
@@ -261,19 +246,22 @@ function searchDomains(query) {
 }
 
 function searchDomainsBefore(diff) { //diff in days before now
-    let allDomains = JSON.parse(localStorage.getItem("allDomains"));
-    if (allDomains){
-        now = new Date();
-        diff *= 1000 * 24 * 60 * 60;
-        this_day = new Date(`${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`).getTime(); //today at 0.00h
-        now = now.getTime();
-        diff = diff + now - this_day - (1000 * 24 * 60 * 60);
-        var histDate = new Date().getTime() - diff; //format epoch (1696255555278)
-        selDomains = allDomains.filter(url => {
-            urldate = new Date(url.date).getTime(); //epoch format
-            return urldate < histDate;
-        });
-        showDomainTable(selDomains);
+    if (diff > 0){
+        let allUrls = JSON.parse(localStorage.getItem("allUrls"));
+        allDomains = deduplicateDomains(allUrls);
+        if (allDomains){
+            now = new Date();
+            diff *= 1000 * 24 * 60 * 60;
+            this_day = new Date(`${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`).getTime(); //today at 0.00h
+            now = now.getTime();
+            diff = diff + now - this_day - (1000 * 24 * 60 * 60);
+            var histDate = new Date().getTime() - diff; //format epoch (1696255555278)
+            selDomains = allDomains.filter(url => {
+                urldate = new Date(url.date).getTime(); //epoch format
+                return urldate < histDate;
+            });
+            showDomainTable(selDomains);
+        }
     }
 }
 
@@ -291,23 +279,14 @@ function downloadFileFromText(filename, content) {
 }
 
 function importUrls(Urls_from_file) {
-    let storedDomains = JSON.parse(localStorage.getItem("allDomains"));
     let storedUrls = JSON.parse(localStorage.getItem("allUrls"));
-    allDomains = storedDomains.concat(Urls_from_file);
     allUrls = storedUrls.concat(Urls_from_file);
-    allDomains.sort((a, b) => {
-        let da = new Date(a.date),
-            db = new Date(b.date);
-        return db - da;
-    });
-    allDomains = deduplicateDomains(allDomains);
     allUrls.sort((a, b) => {
         let da = new Date(a.date),
             db = new Date(b.date);
         return db - da;
     });
     allUrls = deduplicateUrls(allUrls);
-    localStorage.setItem('allDomains', JSON.stringify(allDomains));
     localStorage.setItem('allUrls', JSON.stringify(allUrls));
     $("#popup-settings").hide();
     location.reload();
@@ -319,7 +298,6 @@ function date2LocalString(date) {
 }
 
 function rememberSelUrl(url){ //remember the last selected urls as icons in toolbar
-    // console.log(`url ${url}`);
     const domain = url.replace(/^(?:https?:\/\/)?((?:[^@\/\n]+@)?[^:\/\n]+).*/g, '$1');
     const index = _settings.sel_domains.indexOf(domain); //check if domain is selected earlier
     if (index > -1) {
@@ -389,7 +367,6 @@ $(document).ready(function () {
     $("#date_format_input").on('input', function () {
         _settings.date_format = $(this).val();
         localStorage.setItem('settings', JSON.stringify(_settings));
-        // $('#search_on_date').trigger('change');
     });
     $("#clear").on("click", function () {
         location.reload();
@@ -421,7 +398,6 @@ $(document).ready(function () {
         async function openFilePick() {
             // open file picker, destructure the one element returned array
             [fileHandle] = await window.showOpenFilePicker(pickerOpts);
-            // run code with our fileHandle
             const file = await fileHandle.getFile();
             const contents = await file.text();
             let contents_json = JSON.parse(contents);
@@ -446,14 +422,12 @@ $(document).ready(function () {
         let str = $('#fav_domains_ta').val();
         if (str.length > 0){
             _settings.fav_domains = str.split('\n');
-            // console.log(`${_settings.fav_domains}`);
         } else {
             _settings.fav_domains = [];
         }
         str = $('#skip_domains_ta').val();
         if (str.length > 0){
             _settings.skip_domains = str.split('\n');
-            // console.log(`${_settings.skip_domains}`);
         } else {
             _settings.skip_domains = [];
         }
@@ -475,7 +449,6 @@ $(document).ready(function () {
         const diffTime = Math.abs(date2 - date1);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         searchDomainsBefore(diffDays);
-        // console.log(`search on date: ${diffDays}`)
     }).trigger("change");
     $(document).on('keydown', function (e) {
         if (e.ctrlKey && e.which == 70)  { //Ctrl F
@@ -513,7 +486,6 @@ $(document).ready(function () {
             rows.eq(current + 2).addClass('highlight');
             var current = rows.filter('.highlight').index();
             rows[current].scrollIntoView({
-                // behavior: 'smooth',
                 block: 'center'
             });
             if (_gv.table_with_focus == 'domain_rows') {
@@ -532,7 +504,6 @@ $(document).ready(function () {
             rows.removeClass("highlight");
             rows.eq(current).addClass('highlight');
             rows[current].scrollIntoView({
-                // behavior: 'smooth',
                 block: 'center'
             });
             if (_gv.table_with_focus == 'domain_rows') {
@@ -607,7 +578,6 @@ $(document).ready(function () {
             row.addClass('highlight');
             if (_gv.table_with_focus == 'domain_rows') {
                 _gv.sel_domain = row.find("td").eq(2).html();
-                // console.log(` ${row.find("td").eq(2).html()}`)
                 showUrlTable(_gv.sel_domain);
             }
         }

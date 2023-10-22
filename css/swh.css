@@ -320,13 +320,9 @@ textarea {
     align-items: end;
 }
 
-/* .modal-header-text{
-    margin: 0em;
-    font-size: 1.9rem;
-    font-weight: bold;
-    padding: 0.2em 0.3em;
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-} */
+.space10 {
+    padding-left: 50px;
+}
 
 ul{
     margin: 0;
