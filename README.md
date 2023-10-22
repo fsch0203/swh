@@ -39,7 +39,7 @@ Press Escape to set the focus on the Quick search input and another Escape to cl
 
 In the Settings menu you can download the complete database in json-format. This file can always be imported with the Import button. All duplicates will be filtered out.
 
-By setting Auto close window, the app will be closed after you have opened a url.
+By setting Auto close window, the app will be closed after you have opened a url. In the Format date input field you can specify the preferred date format, e.g. MM/DD/YYYY, D-MMM-YY, etcetera. See [string-format](https://day.js.org/docs/en/parse/string-format).
 
 In the Favorite domains textarea you can give the domains that will be visible with an icon in the toolbar (one domain per line). In the Skip domains textarea you can provide the domains that you want to exclude in the table (one per line). You can also give a part of the domain: for example 'google' will filter out all domains with 'google' somewhere in the name.
 
