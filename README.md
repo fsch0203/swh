@@ -44,3 +44,11 @@ By setting Auto close window, the app will be closed after you have opened a url
 In the Favorite domains textarea you can give the domains that will be visible with an icon in the toolbar (one domain per line). In the Skip domains textarea you can provide the domains that you want to exclude in the table (one per line). You can also give a part of the domain: for example 'google' will filter out all domains with 'google' somewhere in the name.
 
 Clicking the R-button will restore the default settings.
+
+## Privacy Policy
+
+- We do not collect information from users of our app or visitors of our site. 
+- We do not sell, trade, or otherwise transfer to outside parties your Personally Identifiable Information. 
+- We do not include or offer third-party products or services on our website. 
+- We do not track any information. We do not allow third-party behavioral tracking. 
+- We do not specifically market to children under the age of 13 years old.
