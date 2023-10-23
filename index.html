@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
     <meta name="theme-color" content="#218C8D">
-    <meta charset="UTF-8">
+    <meta http-equiv="Cache-control" content="public">
     <title>Smart Web History</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link href="css/swh.css" rel="stylesheet" type="text/css" />
@@ -14,21 +14,42 @@
     <script src="js/swh.js"></script>
 </head>
 
-
 <body>
+    <div id="popup-about" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="close-popup-about" class="closingx">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="about-text" class="about-text">
+                    <h3>About Smart Web History</h3>
+                    <p>Smart Web History is an open source extension for Chrome and Edge to get better and faster access to 
+                        the browser history. It's developed by Frans Schrijver. 
+                    </p>
+                    <p>Version: <span id="version"></span></p>
+                    <p>More information: <span id="website"></span></p>
+                    <p>Copyright © <span id="this-year"></span> Frans Schrijver (MIT license)</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="popup-settings" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span id="close-modal" class="closingx">&times;</span>
+                <span id="close-popup-settings" class="closingx">&times;</span>
             </div>
             <div class="modal-body">
                 <h3>Settings</h3>
                 <ul>
                     <li class="setting-item">
-                        <button id="download" class="button_gen" type="button" 
-                            title="Download domains">▼</button>Download urls<span class="space10"></span>
+                        <button id="download-json" class="button_gen" type="button" 
+                            title="Download domains in json-format (can be imported)">▼</button>Download urls (json)<span class="space10"></span>
                         <button id="open_file" class="button_gen" type="button" 
-                            title="Upload domains">▲</button>Import urls from file
+                            title="Upload domains in json-format">▲</button>Import urls from file (json)
+                    </li>
+                    <li class="setting-item">
+                        <button id="download-csv" class="button_gen" type="button" 
+                            title="Download domains in csv-format (can be imported in Excel)">▼</button>Download urls (csv)
                     </li>
                     <li class="setting-item">
                         <input id="auto_close_window" type="checkbox" title="App will be closed after a link has been clicked">
@@ -42,12 +63,12 @@
                     <li class="setting-item">
                         Favorite domains
                         <textarea id="fav_domains_ta" name="fav-domains" 
-                            title="Favorite&nbsp;domains that will be displayed in the toolbar"></textarea>
+                            title="Favorite domains that will be displayed in the toolbar"></textarea>
                     </li>
                     <li class="setting-item">
                         Skip domains
                         <textarea id="skip_domains_ta" name="skip-domains"
-                            title="Domains that will not be displayed"></textarea>
+                            title="Domains or subdomains with that text will not be displayed (one per line)"></textarea>
                     </li>
                     <li class="setting-item">
                         <button id="restore_settings_btn" class="button_gen" 
@@ -55,28 +76,18 @@
                             Restore default settings
                     </li>
                 </ul>
-                <hr/>
-                <div id="about-text" class="about-text">
-                    <h3>About Smart Web History</h3>
-                    <p>Smart Web History is an open source extension for Chrome and Edge to get better and faster access to 
-                        the browser history. It's developed by Frans Schrijver. 
-                    </p>
-                    <p>Version: <span id="version"></span></p>
-                    <p>More information: <span id="website"></span></p>
-                    <p>Copyright © <span id="this-year"></span> Frans Schrijver (MIT license)</p>
-                </div>
-
             </div>
         </div>
     </div>
     <div class="angry-grid">
         <div id="item-t">
-            <span id="app_img" class="header"><img height="28" width="28" src="res/swh06.png"/></span>&nbsp;
+            <span id="app_img" class="header"><img alt="logo" height="28" width="28" src="res/swh06.png"/></span>&nbsp;
             <span id="apptitle" class="apptitle"></span>
         </div>
         <div id="item-1">
             <span id="time_domain_buttons" class="button_row">
                 <button id="go_settings_btn" class="button button2 font_large" type="button" title="Settings">≡</button>
+                <button id="go_about_btn" class="button button2 font_large" type="button" title="About">?</button>
                 <button id="clear" class="button button2" type="button" title="Show all">C</button>
                 <input type="date" id="search_on_date" class="button2" name="search_on_date" data-date-format="DD-MMM-YYYY" title="Search on date">
             </span>&nbsp;
@@ -104,9 +115,6 @@
             </table>
         </div>
     </div>
-
-
-
 </body>
 
 </html>

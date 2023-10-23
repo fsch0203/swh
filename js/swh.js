@@ -6,7 +6,7 @@ _default_settings = { //settings that are stored in localstorage
     auto_close_window: true,
     fav_domains: ['youtube.com', 'spotify.com', 'wikipedia.org'],
     sel_domains: [], //domains that have been visited through this app
-    skip_domains: ['chrome-extension','mail.google.com'], //skip these domains in domains table
+    skip_domains: ['chrome-extension','localhost','mail.google.com'], //skip these domains in domains table
     max_sel_domains: 6,
     date_format: 'YYYY-MM-DD'
 };
@@ -81,10 +81,6 @@ function showDomainTable(domains) {
     </tr>
   </thead>
 `
-    if (!_settings.skip_domains){
-        _settings = _default_settings;
-        localStorage.setItem('settings', JSON.stringify(_settings));
-    }
     for (let i = 0, ie = domains.length; i < ie; ++i) {
         var valid = true;
         _settings.skip_domains.forEach((skip_domain) => {
@@ -378,10 +374,21 @@ $(document).ready(function () {
         console.log(`${domain_name}`);
         searchDomains(domain_name);
     });
-    $("#download").on("click", function () {
+    $("#download-json").on("click", function () {
         let allUrls = localStorage.getItem("allUrls");
         date = dayjs().format('YYYY-MM-DDTHH_mm');
         downloadFileFromText(`${date} urls.json`, allUrls);
+    });
+    $("#download-csv").on("click", function () {
+        let urls_json = JSON.parse(localStorage.getItem("allUrls"));
+        date = dayjs().format('YYYY-MM-DDTHH_mm');
+        const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
+        let header = Object.keys(urls_json[0]);
+        let urls_csv = urls_json.map(row => header.map(fieldName =>
+            JSON.stringify(row[fieldName], replacer)).join(','))
+        urls_csv.unshift(`"${header.join('","')}"`)
+        urls_csv = urls_csv.join('\r\n')
+        downloadFileFromText(`${date} urls.csv`, urls_csv);
     });
     $("#open_file").on("click", function () {
         const pickerOpts = {
@@ -414,10 +421,16 @@ $(document).ready(function () {
     $("#today-2").on("click", function () {
         searchDomainsBefore(2);
     });
+    $("#go_about_btn").on("click", function () {
+        $("#popup-about").show();
+    });
+    $("#close-popup-about").on("click", function () {
+        $("#popup-about").hide();
+    });
     $("#go_settings_btn").on("click", function () {
         $("#popup-settings").show();
     });
-    $("#close-modal").on("click", function () {
+    $("#close-popup-settings").on("click", function () {
         $("#popup-settings").hide();
         let str = $('#fav_domains_ta').val();
         if (str.length > 0){

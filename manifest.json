@@ -4,7 +4,7 @@
         "type": "module"
     },
     "name": "Smart Web History",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "content_security_policy": {
         "extension_pages": "script-src 'self'; object-src 'self'"
     }, 

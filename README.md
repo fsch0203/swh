@@ -13,15 +13,15 @@ The standard history function of chromium browsers saves all visits with 10 info
 - Favicons for all domains (if available) for quick recognition.
 - Option to provide favorite domains (e.g. Wikipedia, Youtube) that will show up as icon in the toolbar.
 - Option to provide specific domains that will be hidden.
-- Export function: urls can be saved to a (json) file.
-- Import function: urls can be imported from a (json) file.
+- Export function: urls can be saved to a json or csv file.
+- Import function: urls can be imported from a file (json format).
 - Keyboard support to navigate through the domains/pages or to select a url.
 - Free and open source software. 
 - No ads, banners, popups or cookies.
 
 ## Installation
 
-Install the app from the [Microsoft Egde](https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home) or [Google Chrome](https://chrome.google.com/webstore/category/extensions) web store. Make sure the app-icon is visible in the toolbar (Setting, Manage extensions). 
+Install the app from the [Microsoft Edge](https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home) or [Google Chrome](https://chrome.google.com/webstore/category/extensions) web store. Make sure the app-icon is visible in the toolbar (Setting, Manage extensions). 
 
 Or you can download the code from this website and place it in a folder. From Manage extensions select Load unpacked and select the folder with the code.
 
@@ -37,7 +37,7 @@ Press Escape to set the focus on the Quick search input and another Escape to cl
 
 ## Settings
 
-In the Settings menu you can download the complete database in json-format. This file can always be imported with the Import button. All duplicates will be filtered out.
+In the Settings menu you can download the complete database in json-format. This file can always be imported with the Import button. It will merge with the existing data and all duplicates will be filtered out.
 
 By setting Auto close window, the app will be closed after you have opened a url. In the Format date input field you can specify the preferred date format, e.g. MM/DD/YYYY, D-MMM-YY, etcetera. See [string-format](https://day.js.org/docs/en/parse/string-format).
 
@@ -47,8 +47,20 @@ Clicking the R-button will restore the default settings.
 
 ## Privacy Policy
 
-- We do not collect information from users of our app or visitors of our site. 
-- We do not sell, trade, or otherwise transfer to outside parties your Personally Identifiable Information. 
-- We do not include or offer third-party products or services on our website. 
-- We do not track any information. We do not allow third-party behavioral tracking. 
+- We do not collect information from users of our app or visitors of our site.
+- We do not sell, trade, or otherwise transfer to outside parties your personally identifiable information.
+- We do not include or offer third-party products or services on our website.
+- We do not track any information. We do not allow third-party behavioral tracking.
 - We do not specifically market to children under the age of 13 years old.
+
+## Change log
+
+### Version 1.0.1
+
+- Code cleaning
+- Separate popup for About swh
+- Option added to download urls in csv-format
+
+### Version 1.0.0
+
+- Initial release
