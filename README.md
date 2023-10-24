@@ -60,6 +60,7 @@ Clicking the R-button will restore the default settings.
 - Code cleaning
 - Separate popup for About swh
 - Option added to download urls in csv-format
+- Page-up and page-down keys activated
 
 ### Version 1.0.0
 

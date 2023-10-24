@@ -23,7 +23,8 @@ _gv = { //global variables
     table_with_focus: 'domain_rows',
     sel_domain: '',
     total_domains: 0,
-    website: 'https://github.com/fsch0203/swh'
+    website: 'https://github.com/fsch0203/swh',
+    row_count: 10 //# rows in table
 }
 
 function init(){
@@ -56,8 +57,12 @@ function saveWindowPosition() { //activated after window resize
     _settings.screeny = window.screenY;
     _settings.screenw = window.outerWidth;
     _settings.screenh = window.outerHeight;
-    let tableh = (_settings.screenh - 190) / 2;
-    $('table').css('height', tableh);
+    let table_height = (_settings.screenh - 190) / 2;
+    let row_height = $('#domain_rows tr').outerHeight();
+    _gv.row_count = Math.floor((table_height / row_height) - 1);
+    // console.log(`row_count ${row_count}`);
+    // console.log(`table_height ${table_height}`);
+    $('table').css('height', table_height);
     $('#domain_rows td.col_domain').css('width', (_settings.screenw - 230) * 1 / 3);
     $('#domain_rows td.col_domain').css('min-width', (_settings.screenw - 230) * 1 / 3);
     $('#domain_rows td.col_domain').css('max-width', (_settings.screenw - 230) * 1 / 3);
@@ -90,10 +95,11 @@ function showDomainTable(domains) {
         });
         if (valid) {
             date = date2LocalString(domains[i].date);
+            fav_src = `"http://www.google.com/s2/favicons?domain=${domains[i].domain}"`
             let row = `
 <tr>
     <td class="col_date">${date}</td>
-    <td class="col_fav"><img height="16" width="16" src="http://www.google.com/s2/favicons?domain=http://${domains[i].domain}" /></td>
+    <td class="col_fav"><img height="16" width="16" src=${fav_src} /></td>
     <td class="col_domain">${domains[i].domain.substring(0, 40)}</td>
     <td class="col_title"><a href="${domains[i].url}" target="_blank">${domains[i].title}</a></td>
 </tr>        
@@ -109,6 +115,7 @@ function showDomainTable(domains) {
         $('#count_domains').removeClass('highlight2')
     }
     $('#domain_rows tr').eq(1).click();
+    
 }
 
 function showUrlTable(selDomain) {
@@ -487,6 +494,44 @@ $(document).ready(function () {
         }
     });
     $('.angry-grid').on('keydown', function (e) {
+        if (e.which == 34) { // highlight page-down
+            if (_gv.table_with_focus == 'domain_rows') {
+                var rows = $('#domain_rows tr')
+            } else {
+                var rows = $('#url_rows tr')
+            }
+            var current = rows.filter('.highlight').index();
+            if (current >= rows.length - _gv.row_count) return;
+            rows.removeClass("highlight");
+            rows.eq(current + _gv.row_count).addClass('highlight');
+            current = rows.filter('.highlight').index();
+            rows[current].scrollIntoView({
+                block: 'center'
+            });
+            if (_gv.table_with_focus == 'domain_rows') {
+                _gv.sel_domain = rows.eq(current + 1).find('td.col_domain').html();
+                showUrlTable(_gv.sel_domain);
+            };
+        };
+        if (e.which == 33) { // highlight page-up
+            if (_gv.table_with_focus == 'domain_rows') {
+                var rows = $('#domain_rows tr')
+            } else {
+                var rows = $('#url_rows tr')
+            }
+            var current = rows.filter('.highlight').index();
+            if (current == 0) return;
+            rows.removeClass("highlight");
+            rows.eq(current - _gv.row_count + 2).addClass('highlight');
+            current = rows.filter('.highlight').index();
+            rows[current].scrollIntoView({
+                block: 'center'
+            });
+            if (_gv.table_with_focus == 'domain_rows') {
+                _gv.sel_domain = rows.eq(current).find('td.col_domain').html();
+                showUrlTable(_gv.sel_domain);
+            }
+        }
         if (e.which == 40) { // highlight go down
             if (_gv.table_with_focus == 'domain_rows') {
                 var rows = $('#domain_rows tr')
